@@ -6,15 +6,20 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
+import * as compression from 'compression';
+
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const globalPrefix = 'api';
+  const globalPrefix = ''; // TODO: add a global prefix when app will be an API
+  const port = process.env.PORT || 3000;
+
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3333;
+  app.use(compression());
+
   await app.listen(port, () => {
-    Logger.log('Listening at http://localhost:' + port + '/' + globalPrefix);
+    Logger.log(`Listening at http://localhost:${ port }/${ globalPrefix }`);
   });
 }
 

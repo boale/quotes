@@ -28,7 +28,8 @@
       "unitTestRunner": "jest"
     },
     "@nrwl/angular:component": {
-      "style": "scss"
+      "style": "scss",
+      "changeDetection": "OnPush"
     }
   },
   "projects": {
@@ -47,8 +48,14 @@
             "polyfills": "apps/quotes/src/polyfills.ts",
             "tsConfig": "apps/quotes/tsconfig.app.json",
             "aot": true,
-            "assets": ["apps/quotes/src/favicon.ico", "apps/quotes/src/assets"],
-            "styles": ["apps/quotes/src/styles.scss"],
+            "assets": [
+              "apps/quotes/src/favicon.ico",
+              "apps/quotes/src/assets"
+            ],
+            "styles": [
+              "node_modules/ngx-toastr/toastr.css",
+              "apps/quotes/src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -104,7 +111,7 @@
           "options": {
             "lintFilePatterns": [
               "apps/quotes/src/**/*.ts",
-              "apps/quotes/src/**/*.html"
+              "apps/quotes/src/**/*.component.html"
             ]
           }
         },

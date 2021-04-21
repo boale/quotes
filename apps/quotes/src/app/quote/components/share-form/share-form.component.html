@@ -1,0 +1,45 @@
+<div class="share-form-wrapper">
+  <div class="toggler-wrapper">
+    <label>Share via:&nbsp;</label>
+    <div class="toggler-wrapper-options">
+      <ng-container *ngFor="let shareOption of shareOptions">
+        <app-button
+          (clicked)="selectShareOption(shareOption)"
+          [label]="shareOption.title"
+          [class.active]="isShareOptionActive(shareOption)"
+        >
+        </app-button>
+      </ng-container>
+    </div>
+    <br/>
+  </div>
+
+  <div class="form-control-wrapper" *ngIf="selectedShareOption">
+    <ng-container [formGroup]="form">
+      <label>
+        <app-input
+          [id]="'share'"
+          [type]="selectedShareOption.inputType"
+          [form]="form"
+          [placeholder]="selectedShareOption.placeholder"
+        >
+        </app-input>
+      </label>
+    </ng-container>
+  </div>
+</div>
+<div class="button-wrapper">
+  <app-button
+    type="submit"
+    [disabled]="!isShareFormValid"
+    [label]="'Send'"
+    (clicked)="submit()"
+  >
+  </app-button>
+  <app-button
+    [class]="'cancel-btn'"
+    [label]="'Dismiss'"
+    (clicked)="dismiss()"
+  >
+  </app-button>
+</div>

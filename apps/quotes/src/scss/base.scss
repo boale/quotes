@@ -1,0 +1,18 @@
+@import './reset';
+@import './fonts';
+@import './icons';
+@import './variables';
+@import './modal';
+
+body {
+  font-family: $font, $font__primary, $font__fallback;
+  background-color: $color__blue;
+  display: flex;
+  min-width: 320px;
+  width: 100%;
+  line-height: 1;
+  font-size: $font__size;
+  -ms-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
