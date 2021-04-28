@@ -3,26 +3,58 @@ import { Injectable, Logger } from "@nestjs/common";
 import { v4 } from 'uuid';
 
 import {
-  BaseRepo,
+  BaseRepo, CollectionRecords,
   CollectionResult,
   ForceOpts,
   SearchCriteria,
   SoftDeleteFlag,
   TimeStamps,
-  WithId,
+  WithId
 } from './models';
 import {
   doesRecordMatchCriteria,
-  isEmptyRecord,
+  isEmptyRecord, mapArrayToCollection,
   mapCollectionToArray,
-  mapToCollectionResult,
-  sliceAndSort
+  mapToCollectionResult, readJson,
+  sliceAndSort, writeJson
 } from './utils';
+import { PathLike } from 'fs';
 
 @Injectable()
-export class JsonDbCollectionService<T> extends BaseRepo<T> {
+export class JsonDbCollectionService<T>  {
+  protected collectionRecords: CollectionRecords<T|T&WithId&TimeStamps&SoftDeleteFlag> = {}
+  protected collectionPath: string | PathLike;
+  isLoaded = false;
+  isSynced = false;
+
+  loadCollection(path?: string | PathLike) {
+    if (this.isLoaded || this.collectionPath) {
+      return Promise.resolve();
+    }
+
+    this.collectionPath = path;
+
+    return readJson<T[]>(this.collectionPath)
+      .then((data: T[]) => {
+        this.collectionRecords = { ...mapArrayToCollection<T>(data) };
+        this.isLoaded = true;
+        this.isSynced = true;
+      });
+  }
+
+  syncCollection(): Promise<void | Error> {
+    if (this.isSynced) {
+      return Promise.resolve();
+    }
+
+    return writeJson<T[]>(this.collectionPath, mapCollectionToArray<T>(this.collectionRecords))
+      .then(() => {
+        this.isSynced = true;
+        // this.isLoaded = false;
+      });
+  }
+
   constructor(private logger: Logger) {
-    super()
   }
 
   find<S = unknown>({ where, limit, page = 0, sortBy, order }: SearchCriteria<S> = {}): Promise<CollectionResult<T>> {

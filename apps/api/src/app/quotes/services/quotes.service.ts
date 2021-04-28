@@ -5,7 +5,7 @@ import { join } from "path";
 import { Quote } from "@quotes/api-interfaces";
 
 import { getRandomFromArray } from "../../shared/utils";
-import { ResultReturnOptions, JsonDbCollectionService } from "./json-db-collection";
+import { ResultReturnOptions, JsonDbCollectionService, BaseRepo, RepoResult } from '../../json-db-collection';
 
 export interface QuoteSearchCriteria {
   author?: string|string[];
@@ -15,11 +15,13 @@ export interface QuoteSearchCriteria {
 }
 
 @Injectable()
-export class QuotesService {
+export class QuotesService extends BaseRepo<Quote>{
 
   constructor(private quotesJson: JsonDbCollectionService<Quote>) {
+    super();
+
     this.quotesJson
-      .loadCollection(join(__dirname, 'assets', 'quotes.json'))
+      .loadCollection(join(__dirname, 'assets', 'quotes.json')) // get from config..
       .then()
       .catch()
       .finally();
@@ -28,30 +30,38 @@ export class QuotesService {
   find(
     searchCriteria: QuoteSearchCriteria = {},
     { limit, page = 0, sortBy, order }: ResultReturnOptions = {},
-  ): Promise<Quote | Quote[] | null> {
+  ): Promise<RepoResult<Quote | Quote[] | null>> {
     const { tags, author, isDeleted } = searchCriteria;
 
-    return this.quotesJson.find({ where: { tags, author, isDeleted }, sortBy, order, limit, page })
-      .then(({ result }) => result)
-      .catch(() => ([]));
+    return this.quotesJson.find({
+      where: { tags, author, isDeleted },
+      sortBy, order, limit, page,
+    })
+      .then(({ result, resultCount, total, limit, page }) => ({
+        result, resultCount, page, limit, total,
+      }))
+      .catch((error) => ({ result: null, error }));
   }
 
-  findOne(id: string): Promise<Quote | null> {
+  findOne(id: string): Promise<RepoResult<Quote | null>> {
     return this.quotesJson.findById(id)
-      .then(({ result }) => result as Quote);
+      .then(({ result }) => ({ result }))
+      .catch(error => ({ result: null, error }));
   }
 
-  random({ author, tags, isDeleted }: QuoteSearchCriteria): Promise<Quote> {
+  random({ author, tags, isDeleted }: QuoteSearchCriteria): Promise<RepoResult<Quote>> {
     return this.quotesJson.find({ where: { author, tags, isDeleted } })
       .then(({ result }) => (Array.isArray(result) ? result : [ result ]))
-      .then((quotes: Quote[]) => getRandomFromArray<Quote>(quotes));
+      .then((quotes: Quote[]) => ({
+        result: getRandomFromArray<Quote>(quotes),
+      })).catch(error => ({ result: null, error }));
   }
 
-  update(id: string, data: Partial<Quote>): Promise<unknown> {
+  update(id: string, data: Partial<Quote>): Promise<RepoResult<boolean>> {
     return this.quotesJson.update(id, data);
   }
 
-  delete(id: string): Promise<unknown> {
+  delete(id: string): Promise<RepoResult<boolean>> {
     return this.quotesJson.delete(id);
   }
 

@@ -1,24 +1,11 @@
 import {Controller, Get, Delete, Post, Put, Query, HttpStatus, Res, Param, Body} from '@nestjs/common';
 import { Response } from 'express';
 
-import { QuotesService } from "./services";
 import { ApiResponseData, Quote } from "@quotes/api-interfaces";
 
-function mapToApiResponseData<T, E = null>(data: T, statusCode = 200, message = 'OK', error?: E): ApiResponseData<T, E> {
-  return {  data,  message, statusCode, error };
-}
-
-function convertQueryDataToArray<T = unknown>(queryData: unknown, sep = ','): T[] | string[] | unknown[] {
-  if (Array.isArray(queryData)) {
-    return queryData.reduce((memo, data) => ([ ...memo, ...convertQueryDataToArray<T>(data)]), []);
-  }
-
-  if(typeof queryData === 'string') {
-    return queryData.split(sep);
-  }
-
-  return [ queryData ];
-}
+import { QuotesService } from "./services";
+import { RepoResult } from '../json-db-collection';
+import { convertQueryDataToArray, mapToApiResponseData } from '../shared/utils';
 
 @Controller('api/quotes')
 export class QuotesController {
@@ -29,7 +16,7 @@ export class QuotesController {
   @Get()
   findAll(
     @Query() query,
-  ): Promise<ApiResponseData<Quote[]>> {
+  ): Promise<ApiResponseData<Quote|Quote[]>> {
     // TODO: DRY
     const { tags, tag, page, limit, author, order, sortBy } = query;
     const normalizedTags = [
@@ -48,7 +35,11 @@ export class QuotesController {
         order,
         sortBy,
       })
-      .then((data: Quote[]) => mapToApiResponseData<Quote[]>(data));
+      .then(({ result, error }: RepoResult<Quote>) => {
+        return error
+          ? mapToApiResponseData<null, Error>(result as null, 500, 'Oops..', error)
+          : mapToApiResponseData<Quote|Quote[]>(result)
+      });
   }
 
   @Post()
@@ -75,14 +66,16 @@ export class QuotesController {
         tags: normalizedTags,
         author: convertQueryDataToArray<string>(author) as string[],
       })
-      .then((data: Quote) => {
-        if (!data) {
+      .then(({ result, error }: RepoResult<Quote>) => {
+        if (!result && ! error) {
           res.status(HttpStatus.NOT_FOUND)
 
-          return mapToApiResponseData(data, HttpStatus.NOT_FOUND, 'Not found')
+          return mapToApiResponseData(result, HttpStatus.NOT_FOUND, 'Not found')
         }
 
-        return mapToApiResponseData(data);
+        return error
+          ? mapToApiResponseData<null, Error>(result as null, 500, 'Oops..', error)
+          : mapToApiResponseData<Quote>(result as Quote)
       });
   }
 
@@ -93,14 +86,14 @@ export class QuotesController {
   ) {
     return this.quotesService
       .findOne(id)
-      .then((quote) => {
-        if (!quote) {
+      .then(({ result }) => {
+        if (!result) {
           res.status(HttpStatus.NOT_FOUND)
 
-          return mapToApiResponseData(quote, HttpStatus.NOT_FOUND, 'Not found')
+          return mapToApiResponseData(result, HttpStatus.NOT_FOUND, 'Not found')
         }
 
-        return mapToApiResponseData(quote);
+        return mapToApiResponseData(result);
       });
   }
 
@@ -113,7 +106,7 @@ export class QuotesController {
     return this.quotesService
       .update(id, body)
       .then(() => this.quotesService.findOne(id))
-      .then((quote) => mapToApiResponseData(quote));
+      .then(({ result }) => mapToApiResponseData(result));
   }
 
   @Delete(':id')

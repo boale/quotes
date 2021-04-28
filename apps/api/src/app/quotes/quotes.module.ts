@@ -1,6 +1,7 @@
 import { Logger, Module } from '@nestjs/common';
 
-import { JsonDbCollectionService, QuotesService } from "./services";
+import { QuotesService } from "./services";
+import { JsonDbCollectionService } from "../json-db-collection";
 import { QuotesController } from './quotes.controller';
 
 @Module({
