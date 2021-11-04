@@ -1,0 +1,11 @@
+<ng-container *ngIf="quote">
+  <div class="quote">
+      <blockquote class="quote__blockquote">
+        <p>
+          {{ quote.text }}
+        </p>
+        <cite>&copy;{{ quote.author }}</cite>
+      </blockquote>
+  </div>
+</ng-container>
+

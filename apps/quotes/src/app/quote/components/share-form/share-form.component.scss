@@ -1,0 +1,54 @@
+@import "~scss/variables";
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 50%;
+  padding: 20px;
+}
+
+.share-form-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: auto;
+
+  .toggler-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    label {
+      margin-bottom: 15px;
+    }
+
+    &-options {
+      display: flex;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-right: auto;
+
+      ::ng-deep {
+        app-button {
+          button {
+            border-radius: 0;
+          }
+
+          &.active button{
+            background: $color__blue_dark;
+          }
+        }
+      }
+    }
+  }
+}
+
+.button-wrapper {
+  margin-top: auto;
+  align-self: flex-end;
+
+  ::ng-deep {
+    app-button:first-child {
+      margin-right: 10px;
+    }
+  }
+}
+

@@ -1,0 +1,5 @@
+{
+  "path": ".",
+  "tag-prefix": "quotes-v",
+  "releaseCommitMessageFormat": "chore(release): quotes@{{currentTag}}"
+}

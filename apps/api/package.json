@@ -1,0 +1,17 @@
+{
+  "name": "quotes-api",
+  "version": "0.0.0",
+  "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/boale/quotes/tree/main/apps/api#readme",
+  "bugs": {
+    "url": "https://github.com/boale/quotes/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boale/quotes",
+    "directory": "apps/api"
+  },
+  "license": "MIT",
+  "author": "Oleksandr Bondarenko"
+}

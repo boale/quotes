@@ -1,0 +1,21 @@
+@import '~scss/variables';
+@import '~scss/mixins';
+
+:host {
+  display: flex;
+
+  @include md {
+    flex-direction: column;
+  }
+}
+
+::ng-deep {
+  .share-modal {
+    max-width: $breakpoint__md;
+
+    .nsm-content {
+      padding: 0;
+      margin: 0;
+    }
+  }
+}
